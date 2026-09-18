@@ -1,0 +1,232 @@
+{
+  "_comment": "Catalogue des modèles (CDC §13bis). Maintenu par le développeur : vérifier les identifiants auprès de chaque fournisseur avant une publication. context_window = fenêtre réelle du modèle ; Archipelle en utilise au plus limits.max_context_tokens.",
+  "verified_on": "2026-09-18",
+  "limits": {
+    "max_context_tokens": 200000
+  },
+  "fallback": {
+    "context_window": 32000,
+    "max_output": 4000
+  },
+  "providers": {
+    "mistral": {
+      "label": "Mistral",
+      "region": "eu",
+      "api": "mistral",
+      "base_url": null,
+      "key_required": true,
+      "reasoning_echo": "none",
+      "defaults": {
+        "quick": "mistral-small-latest",
+        "explore": "mistral-medium-latest"
+      },
+      "models": [
+        {
+          "id": "mistral-small-latest",
+          "label": "Mistral Small 4",
+          "context_window": 256000,
+          "max_output": 16000,
+          "tools": true,
+          "description": "Rapide et économique, raisonnement réglable. Bon choix pour les recherches simples."
+        },
+        {
+          "id": "mistral-medium-latest",
+          "label": "Mistral Medium 3.5",
+          "context_window": 256000,
+          "max_output": 32000,
+          "tools": true,
+          "description": "Plus fiable pour enchaîner les outils, croiser plusieurs documents et faire des calculs agrégés."
+        },
+        {
+          "id": "mistral-large-latest",
+          "label": "Mistral Large 3",
+          "context_window": 256000,
+          "max_output": 16000,
+          "tools": true,
+          "description": "Grand modèle généraliste, très bon en multilingue ; sans raisonnement étendu."
+        },
+        {
+          "id": "ministral-14b-latest",
+          "label": "Ministral 3 14B",
+          "context_window": 256000,
+          "max_output": 16000,
+          "tools": true,
+          "description": "Petit modèle agentique, appels d'outils natifs. Accessible sur les paliers sans abonnement, quand les modèles Small et Medium sont refusés."
+        },
+        {
+          "id": "ministral-8b-latest",
+          "label": "Ministral 3 8B",
+          "context_window": 256000,
+          "max_output": 16000,
+          "tools": true,
+          "description": "Encore plus rapide et moins cher que le 14B, pour des recherches simples."
+        }
+      ]
+    },
+    "openai": {
+      "label": "OpenAI",
+      "region": "us",
+      "api": "openai_compat",
+      "base_url": "https://api.openai.com/v1",
+      "key_required": true,
+      "reasoning_echo": "none",
+      "max_tokens_param": "max_completion_tokens",
+      "stream_usage": true,
+      "defaults": {
+        "quick": "gpt-5.6-luna",
+        "explore": "gpt-5.6-terra"
+      },
+      "models": [
+        {
+          "id": "gpt-5.6-luna",
+          "label": "GPT-5.6 Luna",
+          "context_window": 1050000,
+          "max_output": 32000,
+          "tools": true,
+          "description": "Le plus rapide et le moins cher de la gamme GPT-5.6, adapté aux recherches courantes."
+        },
+        {
+          "id": "gpt-5.6-terra",
+          "label": "GPT-5.6 Terra",
+          "context_window": 1050000,
+          "max_output": 32000,
+          "tools": true,
+          "description": "Équilibre entre qualité et coût ; bon pour croiser des documents et raisonner sur plusieurs étapes."
+        },
+        {
+          "id": "gpt-5.6-sol",
+          "label": "GPT-5.6 Sol",
+          "context_window": 1050000,
+          "max_output": 32000,
+          "tools": true,
+          "description": "Le plus capable de la gamme, pour les analyses les plus exigeantes ; plus lent et plus cher."
+        }
+      ]
+    },
+    "anthropic": {
+      "label": "Anthropic",
+      "region": "us",
+      "api": "anthropic",
+      "base_url": null,
+      "key_required": true,
+      "reasoning_echo": "same_model",
+      "defaults": {
+        "quick": "claude-haiku-4-5-20251001",
+        "explore": "claude-sonnet-5"
+      },
+      "models": [
+        {
+          "id": "claude-haiku-4-5-20251001",
+          "label": "Claude Haiku 4.5",
+          "context_window": 200000,
+          "max_output": 16000,
+          "tools": true,
+          "description": "Le plus rapide et le moins cher des modèles Claude, fiable pour les recherches simples."
+        },
+        {
+          "id": "claude-sonnet-5",
+          "label": "Claude Sonnet 5",
+          "context_window": 1000000,
+          "max_output": 32000,
+          "tools": true,
+          "description": "Très bon compromis vitesse et qualité, avec raisonnement adaptatif ; recommandé pour l'exploration."
+        },
+        {
+          "id": "claude-opus-5",
+          "label": "Claude Opus 5",
+          "context_window": 1000000,
+          "max_output": 32000,
+          "tools": true,
+          "description": "Pour les analyses complexes et les croisements de nombreux documents ; plus lent et plus cher."
+        },
+        {
+          "id": "claude-fable-5-1",
+          "label": "Claude Fable 5.1",
+          "context_window": 1000000,
+          "max_output": 32000,
+          "tools": true,
+          "description": "Le plus capable, pour le raisonnement exigeant sur de longues explorations ; le plus cher."
+        }
+      ]
+    },
+    "deepseek": {
+      "label": "DeepSeek",
+      "region": "cn",
+      "api": "openai_compat",
+      "base_url": "https://api.deepseek.com",
+      "key_required": true,
+      "reasoning_echo": "always",
+      "max_tokens_param": "max_tokens",
+      "stream_usage": true,
+      "defaults": {
+        "quick": "deepseek-flash",
+        "explore": "deepseek-v4-pro"
+      },
+      "models": [
+        {
+          "id": "deepseek-flash",
+          "label": "DeepSeek V4.1 Flash",
+          "context_window": 1000000,
+          "max_output": 32000,
+          "tools": true,
+          "description": "Rapide et très économique, avec raisonnement."
+        },
+        {
+          "id": "deepseek-v4-pro",
+          "label": "DeepSeek V4 Pro",
+          "context_window": 1000000,
+          "max_output": 32000,
+          "tools": true,
+          "description": "Raisonnement plus poussé pour les questions complexes."
+        }
+      ]
+    },
+    "kimi": {
+      "label": "Kimi (Moonshot AI)",
+      "region": "cn",
+      "api": "openai_compat",
+      "base_url": "https://api.moonshot.ai/v1",
+      "key_required": true,
+      "reasoning_echo": "always",
+      "max_tokens_param": "max_tokens",
+      "stream_usage": true,
+      "defaults": {
+        "quick": "kimi-k2.6",
+        "explore": "kimi-k3"
+      },
+      "models": [
+        {
+          "id": "kimi-k2.6",
+          "label": "Kimi K2.6",
+          "context_window": 256000,
+          "max_output": 32000,
+          "tools": true,
+          "description": "Modèle généraliste avec raisonnement, adapté aux tâches d'agent."
+        },
+        {
+          "id": "kimi-k3",
+          "label": "Kimi K3",
+          "context_window": 1000000,
+          "max_output": 32000,
+          "tools": true,
+          "description": "Le plus capable de Kimi, raisonnement approfondi ; plus lent et plus cher."
+        }
+      ]
+    },
+    "custom": {
+      "label": "Compatible OpenAI (adresse personnalisée)",
+      "region": "custom",
+      "api": "openai_compat",
+      "base_url": null,
+      "key_required": false,
+      "reasoning_echo": "none",
+      "max_tokens_param": "max_tokens",
+      "stream_usage": true,
+      "defaults": {
+        "quick": null,
+        "explore": null
+      },
+      "models": []
+    }
+  }
+}

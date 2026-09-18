@@ -1,0 +1,472 @@
+{
+  "app": {
+    "name": "Archipelle",
+    "tagline": "Interrogez vos documents, sans les indexer."
+  },
+  "errors": {
+    "cancelled": "Recherche interrompue.",
+    "unexpected": "Une erreur inattendue s'est produite. Le détail technique a été enregistré dans les logs.",
+    "path": {
+      "invalid": "Chemin invalide : « {path} ».",
+      "absolute": "Chemin refusé : « {path} » est un chemin absolu. Utilise un chemin relatif au dossier de travail, avec « / » comme séparateur.",
+      "parent": "Chemin refusé : « {path} » contient « .. ». Les chemins doivent rester dans le dossier de travail.",
+      "outside_workspace": "Chemin refusé : « {path} » se trouve hors du dossier de travail.",
+      "outside_scope": "Chemin refusé : « {path} » est hors du sous-dossier choisi par l'utilisateur (« {scope} »).",
+      "not_a_directory": "« {path} » n'est pas un dossier.",
+      "not_found": "Fichier introuvable : « {path} »."
+    },
+    "workspace": {
+      "not_absolute": "Le dossier de travail doit être indiqué par un chemin complet.",
+      "not_found": "Le dossier de travail « {path} » est introuvable.",
+      "not_a_directory": "« {path} » n'est pas un dossier."
+    },
+    "search": {
+      "keyword_too_short": "Mot-clé refusé : « {keyword} » fait moins de {min} caractères et correspondrait à presque tout.",
+      "no_keyword": "Aucun mot-clé exploitable n'a été fourni."
+    },
+    "settings": {
+      "write_failed": "Impossible d'enregistrer les réglages : {detail}."
+    },
+    "source": {
+      "not_verified": "« {path} » ne fait pas partie des sources vérifiées de cette réponse.",
+      "forbidden_type": "Ce type de fichier ne peut pas être ouvert depuis Archipelle : « {path} ».",
+      "open_failed": "Impossible d'ouvrir « {path} » avec l'application par défaut."
+    },
+    "provider": {
+      "unknown": "Erreur inattendue du fournisseur {provider}. Le détail a été enregistré dans les logs.",
+      "auth": "{provider} a refusé la clé API. Vérifiez-la dans les Paramètres.",
+      "quota": "Le crédit ou le quota de votre compte {provider} est épuisé. Vérifiez votre abonnement auprès de {provider}.",
+      "rate_limited": "{provider} a refusé la requête pour cause de limite de débit. Si cela persiste, ce modèle n'est probablement pas accessible à votre offre : choisissez-en un autre dans le sélecteur, ou ajoutez-en un dans les Paramètres avancés.",
+      "network": "Impossible de joindre {provider}. Vérifiez votre connexion internet.",
+      "timeout": "{provider} n'a envoyé aucune donnée pendant {seconds} secondes.",
+      "server": "Le service {provider} est momentanément indisponible ou surchargé. Réessayez dans quelques instants.",
+      "model_not_found": "Ce modèle est introuvable chez {provider} : il a peut-être été retiré. Choisissez un autre modèle dans le sélecteur.",
+      "tools_unsupported": "Ce modèle ne prend pas en charge les appels d'outils, indispensables à Archipelle. Choisissez un autre modèle dans le sélecteur.",
+      "context_too_long": "La conversation dépasse la taille acceptée par ce modèle. Ouvrez une nouvelle conversation ou choisissez un modèle à plus grande fenêtre de contexte.",
+      "bad_request": "{provider} a refusé la requête. Le détail a été enregistré dans les logs.",
+      "missing_key": "Aucune clé API n'est enregistrée pour {provider}. Saisissez-la dans les Paramètres.",
+      "invalid_configuration": "La configuration de {provider} est incomplète ({reason}). Vérifiez-la dans les Paramètres."
+    }
+  },
+  "units": {
+    "bytes": "{value} o",
+    "kb": "{value} Ko",
+    "mb": "{value} Mo",
+    "gb": "{value} Go"
+  },
+  "extraction": {
+    "docx": {
+      "header": "[En-tête]",
+      "footer": "[Pied de page]"
+    },
+    "xlsx": {
+      "sheet": "[Feuille : {name}]"
+    },
+    "pptx": {
+      "slide": "[Diapositive {number}]",
+      "notes": "[Notes de la diapositive]"
+    },
+    "eml": {
+      "from": "De",
+      "to": "À",
+      "cc": "Cc",
+      "date": "Date",
+      "subject": "Objet",
+      "unnamed": "sans nom",
+      "attachments": "[Pièces jointes, non lues : {names}]"
+    }
+  },
+  "progress": {
+    "extracting": "Extraction du texte de {path}",
+    "ocr_image": "OCR de l'image {path}",
+    "pdf_pages": "Extraction de {path} : {done} pages sur {total}",
+    "ocr_pages": "OCR de {path} : {done} pages sur {total}",
+    "fulltext": "Fouille : {done} fichiers sur {total}"
+  },
+  "journal": {
+    "reasons": {
+      "unsupported_format": "Format non exploré",
+      "read_error": "Fichier illisible",
+      "scan_not_processed": "Scan non traité en mode Rapide",
+      "ocr_unavailable": "OCR indisponible (Tesseract absent)",
+      "no_ocr_text": "Aucun texte exploitable dans l'image",
+      "search_cap": "Non fouillé : plafond de recherche atteint"
+    }
+  },
+  "tree": {
+    "header": "Arborescence du dossier de travail — fichiers : {files}, dossiers : {dirs}. Chemins relatifs au dossier de travail, séparateur « / ».",
+    "empty": "(dossier vide)",
+    "not_explored": "format non exploré",
+    "hidden_content": "(contenu non affiché — fichiers : {files}, sous-dossiers : {dirs})",
+    "truncated_depth": "ARBORESCENCE TRONQUÉE : seuls les {depth} premiers niveaux sont affichés. Utilise list_files sur un sous-dossier pour voir son contenu.",
+    "truncated_summary": "ARBORESCENCE RÉSUMÉE : trop volumineuse pour être listée. Seuls les dossiers de premier niveau et le nombre de fichiers par type sont indiqués. Utilise list_files sur un sous-dossier pour voir son contenu.",
+    "summary_root": "(racine) — fichiers : {count} ({types})",
+    "summary_dir": "{name}/ — fichiers : {count} ({types})",
+    "summary_more": "… et {count} autres dossiers non affichés",
+    "scan_capped": "Relevé incomplet : le dossier contient trop d'entrées pour être parcouru en entier.",
+    "unreadable": "Dossiers illisibles (permission refusée) : {count}."
+  },
+  "tools": {
+    "count": {
+      "entries_all": "Entrées : {total}.",
+      "entries_partial": "Entrées : {total} au total, {shown} affichées (plafond atteint, résultat incomplet).",
+      "paths_all": "Correspondances : {total}.",
+      "paths_partial": "Correspondances : {total} au total, {shown} affichées (plafond atteint, résultat incomplet)."
+    },
+    "list": {
+      "header": "Contenu de « {path} » (profondeur {depth}) :",
+      "empty": "Aucune entrée ne correspond.",
+      "dir_line": "{path}/",
+      "file_line": "{path} ({details})",
+      "walk_incomplete": "Parcours incomplet (limite de temps ou d'entrées atteinte après {count} entrées) : le décompte est un minimum. Cible un sous-dossier."
+    },
+    "search_files": {
+      "header": "Noms contenant {keywords} dans « {path} » :",
+      "none": "Aucun fichier ni dossier dont le nom correspond."
+    },
+    "fulltext": {
+      "header": "Recherche de {keywords} dans le contenu des fichiers de « {path} » :",
+      "none": "Aucune occurrence trouvée dans les fichiers fouillés.",
+      "found_all": "Fichiers avec occurrences : {files} ({occurrences} occurrences au total).",
+      "found": "Fichiers avec occurrences : {files} ({occurrences} occurrences au total), {shown} affichés (plafond atteint, liste incomplète).",
+      "file": "- {path} — occurrences : {count}",
+      "hit": "  • (page={page}, offset={offset}) « {snippet} »",
+      "more_hits": "  • … {count} autres occurrences dans ce fichier (utilise read_file pour les voir).",
+      "file_partial": "  • Fichier lu partiellement : d'autres occurrences peuvent exister.",
+      "coverage": "Bilan — fichiers fouillés : {searched} sur {candidates} candidats (dont {cached} depuis le cache).",
+      "scans_quick": "Fichiers scannés non traités en mode Rapide (OCR nécessaire, disponible en mode Exploration) : {count}.",
+      "ocr_unavailable": "Fichiers scannés non lus car l'OCR est indisponible (Tesseract absent) : {count}.",
+      "unsupported": "Fichiers ignorés car leur format n'est pas exploré : {count}.",
+      "partial": "Fichiers lus partiellement (interruption) : {count}.",
+      "errors": "Fichiers illisibles : {count}.",
+      "stopped_cap": "Recherche interrompue : plafond de {limit} fichiers nouvellement extraits atteint. Fichiers non fouillés : {count}.",
+      "stopped_time": "Recherche interrompue : plafond de {seconds} secondes atteint. Fichiers non fouillés : {count}.",
+      "walk_capped": "Le dossier contient trop de fichiers pour être parcouru en entier : cible un sous-dossier.",
+      "resume_hint": "Couverture partielle : resserre la recherche (sous-dossier, extensions, dates) ou relance la même recherche, qui reprendra plus vite car les fichiers déjà extraits sont en cache."
+    },
+    "read": {
+      "is_directory": "« {path} » est un dossier : utilise list_files.",
+      "unsupported": "Le format de « {path} » n'est pas exploré : son contenu ne peut pas être lu.",
+      "bad_page": "Numéro de page invalide : {page}. Les pages commencent à 1.",
+      "bad_offset": "Position invalide : {offset}. La position commence à 0.",
+      "single_page": "« {path} » n'est pas paginé : utilise page=1 ou omets le paramètre.",
+      "page_out_of_range": "La page {page} n'existe pas : le document compte {count} pages.",
+      "header_text": "Fichier « {path} » — caractères {start} à {end} sur {total}.",
+      "header_image": "Image « {path} » (texte obtenu par OCR) — caractères {start} à {end} sur {total}.",
+      "header_pdf": "PDF « {path} » — {count} pages. Les positions (page, offset) sont comptées depuis le début de chaque page.",
+      "page_marker": "[page {page}]",
+      "page_marker_unread": "[page {page} — non lue]",
+      "end_of_file": "Fin du document.",
+      "truncated": "LECTURE TRONQUÉE à {max} caractères. Pour continuer : read_file avec page={page}, offset={offset}.",
+      "pdf_interrupted": "LECTURE INCOMPLÈTE (limite de temps de l'outil) : pages {first} à {last} lues sur {count}. Pour poursuivre : read_file avec page={next}.",
+      "pdf_scanned_quick": "Document scanné : {count} pages non lues en mode Rapide (OCR nécessaire). Signale-le et propose « Continuer / creuser plus ».",
+      "pdf_no_ocr": "OCR indisponible (Tesseract absent) : {count} pages scannées non lues.",
+      "pdf_ocr_failed": "L'OCR a échoué sur les pages {pages}.",
+      "image_quick": "Image « {path} » non lue en mode Rapide (OCR nécessaire). Signale-le et propose « Continuer / creuser plus ».",
+      "image_no_ocr": "Image « {path} » non lue : OCR indisponible (Tesseract absent).",
+      "no_text": "Aucun texte exploitable dans ce fichier.",
+      "timeout_text": "Lecture de « {path} » interrompue par la limite de temps de l'outil. Réessaie ou lis une portion plus petite.",
+      "note_xlsx": "Attention : {count} cellules à formule n'ont pas de valeur enregistrée (classeur jamais ouvert dans un tableur) ; ces valeurs manquent ci-dessous.",
+      "note_attachments": "Pièces jointes présentes mais non lues : {names}.",
+      "note_truncated": "Document très volumineux : son texte a été coupé."
+    },
+    "compute": {
+      "unknown_operation": "Opération inconnue : « {operation} ». Opérations possibles : somme, moyenne, compte, min, max, différence, pourcentage, ratio.",
+      "no_values": "Aucune valeur fournie.",
+      "two_values": "L'opération « {operation} » exige exactement deux valeurs ({count} fournies).",
+      "bad_value": "Valeur n° {index} non numérique : {value}. Utilise un nombre, ou une chaîne au format 1234.56 (point décimal, sans espace ni symbole).",
+      "unit_mismatch": "Calcul refusé : unités différentes ({units}). Convertis les valeurs dans la même unité (et même base HT/TTC) avant de recalculer, ou calcule séparément.",
+      "no_unit": "sans unité",
+      "division_by_zero": "Calcul impossible : division par zéro.",
+      "result": "Résultat ({operation}) : {value}{unit} — valeur exacte : {exact}",
+      "detail": "Détail des valeurs :",
+      "detail_line": "  {index}. {value}{unit} (source : {source})",
+      "no_source": "non précisée",
+      "disclaimer": "Ce calcul garantit l'arithmétique, pas la pertinence des valeurs retenues."
+    },
+    "errors": {
+      "bad_date": "Date invalide pour {parameter} : « {value} ». Format attendu : AAAA-MM-JJ.",
+      "date_range": "modified_after est postérieure à modified_before.",
+      "bad_json": "Paramètres illisibles : un objet JSON était attendu.",
+      "bad_params": "Appel de {name} refusé, paramètres à corriger :\n{errors}",
+      "param_missing": "- paramètre obligatoire absent : {name}",
+      "param_unknown": "- paramètre inconnu : {name}",
+      "param_null": "- valeur vide pour {name}",
+      "param_empty": "- {name} ne doit pas être vide",
+      "param_type": "- type incorrect pour {name} (attendu : {expected})",
+      "unknown_tool": "Outil inconnu : {name}. Outils disponibles : {tools}.",
+      "unexpected": "Erreur inattendue dans l'outil {name}. Le détail a été enregistré ; essaie une autre approche.",
+      "extraction": {
+        "not_found": "Fichier introuvable : « {path} ».",
+        "permission": "Accès refusé à « {path} » (permission insuffisante ou fichier verrouillé).",
+        "offline": "« {path} » n'est pas disponible localement (fichier cloud non synchronisé).",
+        "password": "« {path} » est protégé par un mot de passe : il ne peut pas être lu.",
+        "corrupt": "« {path} » est endommagé ou dans un format inattendu : il ne peut pas être lu.",
+        "unsupported": "Le format de « {path} » n'est pas exploré.",
+        "ocr_unavailable": "OCR indisponible (Tesseract absent) : « {path} » ne peut pas être lu.",
+        "ocr_timeout": "L'OCR de « {path} » a dépassé le temps autorisé.",
+        "read_error": "Erreur de lecture de « {path} ».",
+        "crashed": "La lecture de « {path} » a échoué (fichier malformé ou trop lourd)."
+      }
+    }
+  },
+  "tool_specs": {
+    "list_files": {
+      "description": "Liste le contenu d'un dossier du dossier de travail : noms, taille, date de modification. Sert à détailler un sous-dossier quand l'arborescence initiale est tronquée, ou à filtrer par extension ou par date. Ne lit aucun contenu.",
+      "params": {
+        "path": "Dossier à lister, relatif au dossier de travail, séparateur « / ». Omis : le dossier de travail (ou le sous-dossier choisi par l'utilisateur).",
+        "depth": "Nombre de niveaux à parcourir (1 = contenu direct). Défaut : 1.",
+        "extensions": "Extensions à garder, par exemple [\"pdf\", \"docx\"]. Seuls les fichiers sont alors listés. Tu peux aussi donner un groupe : « documents » (bureautique, PDF, texte), « code » (sources et configuration) ou « images ».",
+        "modified_after": "Garder les fichiers modifiés à cette date ou après (AAAA-MM-JJ).",
+        "modified_before": "Garder les fichiers modifiés à cette date ou avant (AAAA-MM-JJ).",
+        "max_results": "Nombre maximal d'entrées affichées (500 au plus)."
+      }
+    },
+    "search_files": {
+      "description": "Cherche des fichiers et dossiers dont le NOM contient un des mots-clés (insensible à la casse et aux accents, sans expressions régulières). Ne lit aucun contenu : pour chercher dans le texte des documents, utilise search_fulltext.",
+      "params": {
+        "keywords": "Mots ou expressions, combinés en OU. Au moins 3 caractères chacun.",
+        "path": "Dossier où chercher, relatif au dossier de travail. Omis : tout le dossier de travail (ou le sous-dossier choisi par l'utilisateur).",
+        "extensions": "Extensions à garder, par exemple [\"pdf\"]. Tu peux aussi donner un groupe : « documents » (bureautique, PDF, texte), « code » (sources et configuration) ou « images ».",
+        "max_results": "Nombre maximal de chemins affichés (100 au plus)."
+      }
+    },
+    "search_fulltext": {
+      "description": "Cherche des mots-clés dans le CONTENU des documents (insensible à la casse et aux accents, sans expressions régulières). Renvoie pour chaque fichier le nombre d'occurrences et de courts extraits avec leur position (page, offset), réutilisable telle quelle par read_file. La fouille est plafonnée (30 secondes, 300 fichiers nouvellement extraits) : le bilan de couverture indique toujours ce qui a été fouillé ou non. Les documents déjà extraits sont en cache : relancer une recherche interrompue la fait progresser.",
+      "params": {
+        "keywords": "Mots ou expressions, combinés en OU. Au moins 3 caractères chacun. Ajoute les variantes utiles (singulier/pluriel, masculin/féminin).",
+        "path": "Dossier où chercher, relatif au dossier de travail. Omis : tout le dossier de travail (ou le sous-dossier choisi par l'utilisateur). Resserre-le pour une fouille plus rapide et plus complète.",
+        "extensions": "Extensions à fouiller, par exemple [\"pdf\", \"docx\"]. Tu peux aussi donner un groupe : « documents » (bureautique, PDF, texte), « code » (sources et configuration) ou « images ».",
+        "modified_after": "Fouiller les fichiers modifiés à cette date ou après (AAAA-MM-JJ).",
+        "modified_before": "Fouiller les fichiers modifiés à cette date ou avant (AAAA-MM-JJ).",
+        "max_results": "Nombre maximal de fichiers affichés (30 au plus)."
+      }
+    },
+    "read_file": {
+      "description": "Lit le texte d'un fichier (20 000 caractères au plus par appel). Pour un PDF, chaque page commence par un repère [page N]. Si la lecture est tronquée, le résultat indique la position de reprise (page, offset). Sert aussi à aller directement à un passage repéré par search_fulltext.",
+      "params": {
+        "path": "Fichier à lire, relatif au dossier de travail, séparateur « / ».",
+        "page": "Page où commencer (à partir de 1). Pour les formats non paginés, toujours 1.",
+        "offset": "Position de départ en caractères depuis le début de la page (à partir de 0).",
+        "max_chars": "Nombre maximal de caractères à lire (20 000 au plus)."
+      }
+    },
+    "compute": {
+      "description": "Calcule exactement (en décimal) une somme, une moyenne, un compte, un minimum, un maximum, une différence (première − seconde), un pourcentage (première en % de la seconde) ou un ratio (première ÷ seconde). Utilise-le pour TOUT calcul sur des valeurs tirées des documents. Toutes les valeurs doivent avoir la même unité (sauf pour compte) : € et k€, ou HT et TTC, sont refusés.",
+      "params": {
+        "operation": "somme, moyenne, compte, min, max, différence, pourcentage ou ratio.",
+        "values": "Valeurs à combiner, chacune avec son unité et le fichier dont elle provient.",
+        "value": "Nombre, ou chaîne au format 1234.56 (point décimal, sans espace ni symbole).",
+        "unit": "Unité telle qu'écrite dans le document (€, EUR, k€, € HT, m², %…). Vide si aucune.",
+        "source": "Chemin relatif du fichier dont la valeur est tirée."
+      }
+    }
+  },
+  "providers": {
+    "missing_result": "Non exécuté : étape interrompue.",
+    "bridge_after_tools": "(Étape précédente terminée.)",
+    "empty_answer": "(réponse vide)",
+    "empty_result": "(résultat vide)"
+  },
+  "agent": {
+    "mode": {
+      "quick": "Rapide",
+      "explore": "Exploration"
+    },
+    "prompt": {
+      "scope": "L'utilisateur a restreint la recherche au sous-dossier « {scope} » : les outils refusent tout chemin en dehors.",
+      "no_scope": "Aucune restriction n'est active : tout le dossier de travail est accessible.",
+      "keywords_quick": "utilise les termes de la question et leurs variantes grammaticales évidentes (singulier/pluriel, masculin/féminin).",
+      "keywords_explore": "utilise les termes de la question, leurs variantes grammaticales, ainsi que des synonymes et des reformulations.",
+      "knowledge_strict": "**Mode strict.** Si la réponse ne se trouve pas dans les documents, dis-le : « Je ne réponds qu'à partir de vos documents, sauf si vous activez dans Paramètres l'option \"connaissances générales\". » Tes connaissances générales servent à comprendre la question et à construire tes mots-clés, jamais à affirmer un fait.",
+      "knowledge_mixed": "**Mode mixte.** Tu peux compléter avec tes connaissances générales, en distinguant toujours explicitement ce qui vient d'un document (avec sa citation) de ce qui vient de tes connaissances.",
+      "iterations": "Tu disposes d'au plus {count} appels au modèle pour ce tour. À la dernière étape, les outils te seront refusés : rédige alors ta réponse avec ce que tu as trouvé.",
+      "ocr_quick": "Les documents scannés ne sont pas lus dans ce mode (pas d'OCR). Signale-le à l'utilisateur et propose-lui « Continuer / creuser plus ».",
+      "ocr_explore": "Les documents scannés sont lus par OCR, ce qui peut être lent ; un long document peut demander plusieurs appels à `read_file`.",
+      "ocr_unavailable": "L'OCR est indisponible sur cette machine (Tesseract absent) : les documents scannés ne peuvent pas être lus. Signale-le quand le cas se présente."
+    },
+    "notice": {
+      "workdir_changed": "Le dossier de travail est maintenant « {path} ». Les chemins cités plus haut se rapportaient au dossier précédent et ne sont plus accessibles par les outils.",
+      "tree_changed": "Le contenu du dossier de travail a changé depuis la dernière question : l'arborescence ci-dessous remplace la précédente.",
+      "scope_set": "L'utilisateur a restreint la recherche au sous-dossier « {scope} ». Les outils refusent désormais tout chemin en dehors.",
+      "scope_cleared": "La restriction de sous-dossier a été retirée : tout le dossier de travail est de nouveau accessible.",
+      "mode_quick": "Le mode Rapide est actif : pas d'OCR, exploration plus courte.",
+      "mode_explore": "Le mode Exploration est actif : OCR des documents scannés, exploration plus longue, synonymes autorisés.",
+      "deadline_reached": "_(La durée maximale de recherche a été atteinte : cette réponse peut être incomplète.)_",
+      "answer_truncated": "_(La réponse a été coupée : la taille maximale autorisée pour ce modèle est atteinte. Reposez la question de façon plus ciblée pour obtenir la suite.)_"
+    },
+    "synthetic": {
+      "too_many_calls": "Non exécuté : 5 appels d'outils au maximum par étape. Redemande-le à l'étape suivante si nécessaire.",
+      "deadline": "Non exécuté : la durée maximale de recherche est atteinte. Rédige ta réponse avec ce que tu as trouvé.",
+      "no_more_tools": "Non exécuté : limite atteinte. Rédige ta réponse avec ce que tu as trouvé, sans nouvel appel d'outil.",
+      "interrupted": "Non exécuté : recherche interrompue par l'utilisateur.",
+      "app_stopped": "Non exécuté : interrompu par l'arrêt de l'application."
+    },
+    "interrupted": {
+      "by_user": "Recherche interrompue.",
+      "app_stopped": "Recherche interrompue par l'arrêt de l'application."
+    },
+    "partial": {
+      "iterations": "Je n'ai pas pu aboutir à une réponse : la limite de {count} étapes de recherche a été atteinte. Ce qui suit n'est donc pas une réponse à votre question, mais l'état de l'exploration.",
+      "deadline": "Je n'ai pas pu aboutir à une réponse : la durée maximale de recherche a été atteinte après {count} étapes. Ce qui suit n'est donc pas une réponse à votre question, mais l'état de l'exploration.",
+      "consulted": "Documents consultés pendant cette recherche :",
+      "nothing": "Aucun document n'a pu être consulté. Vous pouvez reformuler la question, cibler un sous-dossier, ou passer en mode Exploration."
+    },
+    "marker": {
+      "file": "« {target} » a déjà été lu plus tôt dans cette conversation ({chars} caractères). Son texte n'est plus dans le contexte : relis-le avec read_file si tu en as encore besoin.",
+      "tool": "Résultat de {tool} obtenu plus tôt ({chars} caractères), retiré du contexte : relance l'outil si tu en as encore besoin."
+    },
+    "errors": {
+      "context_saturated": "Cette conversation est devenue trop longue pour la fenêtre de contexte du modèle. Ouvrez une nouvelle conversation, ou choisissez un modèle à plus grande fenêtre.",
+      "unknown_conversation": "Cette conversation est introuvable.",
+      "provider_locked": "Le fournisseur ne peut plus être changé : une question a déjà été posée dans cette conversation. Ouvrez une nouvelle conversation pour en changer.",
+      "turn_in_progress": "Une recherche est en cours dans cette conversation : les réglages sont verrouillés jusqu'à la fin.",
+      "busy": "Une recherche est déjà en cours. Attendez la fin ou arrêtez-la avant d'en lancer une autre.",
+      "empty_question": "La question est vide.",
+      "no_workdir": "Aucun dossier de travail n'est choisi pour cette conversation.",
+      "missing_key": "Aucune clé API n'est enregistrée pour {provider}. Saisissez-la dans les Paramètres.",
+      "nothing_to_stop": "Aucune recherche n'est en cours.",
+      "empty_title": "Le titre est vide."
+    },
+    "continue_question": "Continue la recherche et creuse davantage la question précédente : les documents scannés peuvent maintenant être lus, et tu disposes de plus d'étapes."
+  },
+  "ui": {
+    "common": {
+      "save": "Enregistrer",
+      "cancel": "Annuler",
+      "close": "Fermer",
+      "confirm": "Confirmer",
+      "delete": "Supprimer",
+      "copy": "Copier",
+      "back": "Retour",
+      "loading": "Chargement…"
+    },
+    "mode": {
+      "quick": "Rapide",
+      "explore": "Exploration"
+    },
+    "sidebar": {
+      "new": "Nouvelle conversation",
+      "search": "Rechercher dans les conversations",
+      "settings": "Paramètres",
+      "empty": "Aucune conversation pour l'instant.",
+      "today": "Aujourd'hui",
+      "yesterday": "Hier",
+      "week": "7 derniers jours",
+      "older": "Plus ancien",
+      "rename": "Renommer (double-clic)",
+      "delete": "Supprimer cette conversation",
+      "delete_confirm": "Cette conversation et son historique seront définitivement supprimés."
+    },
+    "conversation": {
+      "untitled": "Nouvelle conversation"
+    },
+    "header": {
+      "toggle_sidebar": "Afficher ou masquer la liste des conversations",
+      "no_workdir": "Choisir un dossier de travail",
+      "change_workdir": "Changer le dossier de travail de cette conversation",
+      "provider": "Fournisseur de cette conversation",
+      "provider_locked": "Le fournisseur ne peut plus être changé : une question a déjà été posée.",
+      "no_model": "Aucun modèle",
+      "missing_key": "Clé API manquante"
+    },
+    "chat": {
+      "empty_title": "Posez votre première question",
+      "empty_body": "Archipelle explorera les documents du dossier choisi et citera ses sources.",
+      "sources": "Sources",
+      "unverified": "source non vérifiée",
+      "interrupted": "Recherche interrompue.",
+      "turn_done": "Réponse terminée · {model} · {seconds} s",
+      "turn_partial": "Recherche incomplète · {model} · {seconds} s",
+      "turn_interrupted_meta": "Recherche interrompue · {seconds} s"
+    },
+    "composer": {
+      "placeholder": "Votre question…",
+      "send": "Envoyer",
+      "stop": "Arrêter",
+      "browse": "Parcourir",
+      "browse_hint": "Restreindre la recherche à un sous-dossier",
+      "clear_scope": "Retirer la restriction",
+      "continue": "Continuer / creuser plus",
+      "continue_hint": "Relance la même question en mode Exploration, pour ce tour seulement"
+    },
+    "transparency": {
+      "see_detail": "Voir le détail de la recherche",
+      "starting": "Préparation…",
+      "iteration": "Étape {index} sur {max}",
+      "elapsed": "{elapsed} s sur {max} s",
+      "files": "Documents consultés ({count}) :",
+      "ignored": "Fichiers non explorés ({count})",
+      "step_tool": "{tool} — {target}",
+      "step_iteration": "Étape {index}",
+      "retry": "{message} Nouvelle tentative dans {wait} s.",
+      "no_detail": "Aucun détail disponible pour cette recherche."
+    },
+    "settings": {
+      "title": "Paramètres",
+      "providers": "Fournisseurs et clés API",
+      "default_provider": "Fournisseur par défaut",
+      "outside_eu": "Les documents envoyés sortent de l'Union européenne.",
+      "key_placeholder": "Clé API",
+      "custom_url": "Adresse du serveur",
+      "custom_url_hint": "Par exemple http://localhost:11434/v1 pour Ollama.",
+      "custom_models": "Modèles disponibles",
+      "custom_models_placeholder": "llama3.1, qwen2.5 (séparés par des virgules)",
+      "cleartext_warning": "Cette adresse n'est pas chiffrée et ne pointe pas vers cette machine : vos documents circuleraient en clair sur le réseau.",
+      "behaviour": "Comportement",
+      "default_workdir": "Dossier de travail par défaut",
+      "choose_folder": "Choisir un dossier…",
+      "general_knowledge": "Autoriser les connaissances générales",
+      "general_knowledge_hint": "Par défaut, Archipelle ne répond qu'à partir de vos documents.",
+      "dark_theme": "Thème sombre",
+      "diagnostic": "Mode diagnostic",
+      "diagnostic_hint": "Enregistre le détail des échanges dans les journaux, clés masquées.",
+      "exclusions": "Dossiers et fichiers ignorés",
+      "exclusions_hint": "Un élément par ligne. Les motifs contenant « * » ou « . » s'appliquent aux fichiers.",
+      "data": "Données locales",
+      "cache_size": "Cache d'extraction : {size}",
+      "purge_cache": "Vider le cache",
+      "purge_cache_confirm": "Les documents devront être ré-extraits à la prochaine recherche.",
+      "purge_history": "Effacer l'historique",
+      "purge_history_confirm": "Toutes les conversations seront définitivement supprimées.",
+      "purge_logs": "Effacer les journaux",
+      "purge_logs_confirm": "Les fichiers de journalisation seront supprimés.",
+      "advanced": "Paramètres avancés"
+    },
+    "advanced": {
+      "title": "Paramètres avancés",
+      "automatic": "Automatique (catalogue)",
+      "explain": "Modèle utilisé par chaque mode, pour chaque fournisseur. « Automatique » suit le catalogue livré avec l'application.",
+      "extra_models": "Autres modèles à proposer",
+      "extra_models_hint": "Identifiants exacts, séparés par des virgules, pour utiliser un modèle absent du catalogue (par exemple ministral-14b-2512). Les appels d'outils sont supposés pris en charge."
+    },
+    "onboarding": {
+      "title": "Bienvenue dans Archipelle",
+      "intro": "Archipelle interroge vos documents sans les indexer : il les explore à la demande et cite ses sources.",
+      "folder": "Dossier de travail",
+      "folder_hint": "Le dossier que l'assistant pourra explorer. Vous pourrez en changer à tout moment.",
+      "provider": "Fournisseur d'IA",
+      "inside_eu": "Traitement dans l'Union européenne.",
+      "outside_eu": "Vos documents seront envoyés hors de l'Union européenne.",
+      "key_placeholder": "Clé API (facultative pour l'instant)",
+      "key_optional": "Vous pourrez la saisir plus tard : elle sera demandée à la première question.",
+      "start": "Commencer"
+    },
+    "dialog": {
+      "link_title": "Lien non ouvert",
+      "link_explain": "Archipelle n'ouvre jamais les liens contenus dans une réponse. Voici son adresse complète :",
+      "key_title": "Clé API pour {provider}"
+    },
+    "notice": {
+      "no_ocr": "Tesseract n'est pas installé : les documents scannés ne pourront pas être lus."
+    },
+    "errors": {
+      "bridge": "L'interface n'a pas pu joindre l'application.",
+      "unknown": "Une erreur est survenue.",
+      "bad_mode": "Mode inconnu.",
+      "empty_key": "La clé est vide.",
+      "bad_setting": "Réglage invalide.",
+      "bad_url": "Adresse invalide : utilisez http:// ou https://."
+    }
+  }
+}

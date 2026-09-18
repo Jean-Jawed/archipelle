@@ -1,0 +1,93 @@
+[project]
+name = "archipelle"
+version = "0.1.0"
+description = "Assistant IA local pour explorer et interroger ses propres documents, par exploration agentique."
+readme = "README.md"
+requires-python = ">=3.12"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Jean-Jawed" }]
+keywords = ["documents", "recherche", "assistant", "ia", "local", "pdf", "ocr", "agent"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: X11 Applications :: GTK",
+    "Environment :: Win32 (MS Windows)",
+    "Environment :: MacOS X",
+    "Intended Audience :: End Users/Desktop",
+    "Natural Language :: French",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: MacOS",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3.12",
+    "License :: OSI Approved :: MIT License",
+    "Topic :: Office/Business",
+    "Topic :: Text Processing :: Indexing",
+]
+
+dependencies = [
+    "platformdirs>=4.2",
+    "pywebview>=5.0",
+    "pypdfium2>=5.0",  # l'API v5 diffère de la v4 (get_bounds)
+    "python-docx>=1.1",
+    "openpyxl>=3.1",
+    "python-pptx>=1.0",
+    "pytesseract>=0.3.13",
+    "pillow>=10.0",
+    "pebble>=5.0",
+    "openai>=3.14",
+    "anthropic>=1.6",
+    "mistralai>=2.10",
+    "httpx>=0.28",   # client HTTP du SDK mistralai (importé directement)
+    "httpx2>=2.13",  # client HTTP des SDK openai et anthropic (importé directement)
+]
+
+[project.urls]
+Homepage = "https://github.com/Jean-Jawed/archipelle"
+Source = "https://github.com/Jean-Jawed/archipelle"
+Issues = "https://github.com/Jean-Jawed/archipelle/issues"
+
+[project.scripts]
+archipelle = "archipelle.__main__:main"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+    "ruff>=0.6",
+    "pyright>=1.1.380",
+    "pypdf>=6.19.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/archipelle"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "SIM", "RUF", "PTH", "N"]
+ignore = [
+    "N818",    # noms d'exceptions sans suffixe Error (PathRefused, Cancelled…) : choix assumé
+    "RUF001",  # caractères ambigus : textes français (’, …) voulus
+    "RUF002",
+    "RUF003",
+]
+
+[tool.pyright]
+include = ["src", "tests"]
+pythonVersion = "3.12"
+typeCheckingMode = "strict"
+reportMissingTypeStubs = false
+reportUnnecessaryTypeIgnoreComment = "warning"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra --strict-markers"
+markers = [
+    "requires_tesseract: nécessite l'exécutable Tesseract",
+]

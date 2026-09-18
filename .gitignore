@@ -1,0 +1,17 @@
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+dist/
+build/
+*.egg-info/
+tests/corpus/generated/
+.DS_Store
+Thumbs.db
+docs/
+# Jamais de configuration ni de clés dans le dépôt
+config.json
+secrets.json
+node_modules/
+package-lock.json

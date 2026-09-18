@@ -1,0 +1,31 @@
+{
+  "_comment": "Table d'équivalence des unités pour l'outil compute (CDC §4). Les variantes sont comparées après normalisation (minuscules, sans accents, espaces réduits). Les qualificatifs (HT, TTC…) s'ajoutent à l'unité : « € HT » et « € TTC » sont des unités différentes.",
+  "units": {
+    "EUR": ["€", "eur", "euro", "euros"],
+    "kEUR": ["k€", "keur", "k eur", "milliers d'euros", "millier d'euros"],
+    "MEUR": ["m€", "meur", "millions d'euros", "million d'euros"],
+    "USD": ["$", "usd", "us$", "dollar", "dollars", "dollar us", "dollars us"],
+    "GBP": ["£", "gbp", "livre sterling", "livres sterling"],
+    "CHF": ["chf", "franc suisse", "francs suisses"],
+    "%": ["%", "pourcent", "pour cent", "pourcentage", "pct"],
+    "m2": ["m²", "m2", "mètre carré", "mètres carrés", "metre carre", "metres carres"],
+    "m": ["m", "mètre", "mètres"],
+    "km": ["km", "kilomètre", "kilomètres"],
+    "kg": ["kg", "kilo", "kilos", "kilogramme", "kilogrammes"],
+    "g": ["g", "gramme", "grammes"],
+    "t": ["t", "tonne", "tonnes"],
+    "l": ["l", "litre", "litres"],
+    "kWh": ["kwh", "kilowattheure", "kilowattheures"],
+    "h": ["h", "heure", "heures"],
+    "min": ["min", "minute", "minutes"],
+    "jour": ["j", "jour", "jours"],
+    "mois": ["mois"],
+    "an": ["an", "ans", "année", "années"],
+    "unité": ["unité", "unités", "u", "pièce", "pièces", "pce"]
+  },
+  "qualifiers": {
+    "HT": ["ht", "hors taxe", "hors taxes", "hors tva"],
+    "TTC": ["ttc", "toutes taxes comprises"],
+    "TVA": ["tva"]
+  }
+}

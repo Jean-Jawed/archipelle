@@ -1,0 +1,23 @@
+{
+  "_comment": "Scénario du mode démo (ARCHIPELLE_FAKE_SCRIPT). Aucune clé ni aucun appel réseau : les outils s'exécutent réellement sur le dossier choisi, seules les réponses du modèle sont simulées.",
+  "steps": [
+    {
+      "text": "Je commence par regarder le contenu du dossier.",
+      "reasoning": "Démonstration : exploration du dossier.",
+      "delay_s": 0.6,
+      "tool_calls": [{"id": "demo_1", "name": "list_files", "arguments": {"depth": 2}}]
+    },
+    {
+      "text": "Je cherche maintenant quelques mots courants dans le contenu des documents.",
+      "delay_s": 0.6,
+      "tool_calls": [
+        {"id": "demo_2", "name": "search_fulltext", "arguments": {"keywords": ["contrat", "facture", "montant"]}}
+      ]
+    },
+    {
+      "text": "Ceci est une réponse de démonstration : aucun modèle d'IA n'a été appelé. Les recherches ci-dessus ont bien été exécutées sur votre dossier, et leur détail est visible dans la zone de transparence. Pour obtenir de vraies réponses, saisissez la clé API d'un fournisseur dans les Paramètres.",
+      "delay_s": 0.8
+    }
+  ],
+  "when_exhausted": "Le scénario de démonstration est terminé. Saisissez la clé API d'un fournisseur dans les Paramètres pour poser de vraies questions."
+}

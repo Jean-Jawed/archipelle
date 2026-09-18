@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    name: ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
+      - name: Installer Python et les dépendances
+        run: uv sync --locked
+
+      - name: Lint
+        run: uv run ruff check --output-format=github .
+
+      - name: Formatage
+        run: uv run ruff format --check .
+
+      - name: Types
+        run: uv run pyright
+
+      - name: Traductions
+        run: uv run python scripts/check_i18n.py
+
+      # OCR vérifié sur Linux seulement : l'installer sur macOS et Windows coûterait
+      # plusieurs minutes par exécution. Ailleurs, les tests OCR sont ignorés.
+      - name: Installer Tesseract (Linux uniquement)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y tesseract-ocr tesseract-ocr-fra
+
+      - name: Tests
+        run: uv run pytest -rs
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Dépendances de test de l'interface
+        run: npm install --no-audit --no-fund
+
+      - name: Tests de l'interface web
+        run: npm test
+
+      - name: Dépendances web embarquées (empreintes)
+        run: uv run python scripts/fetch_vendor.py

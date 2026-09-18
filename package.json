@@ -1,0 +1,12 @@
+{
+  "name": "archipelle-ui-tests",
+  "private": true,
+  "type": "module",
+  "description": "Outils de test de l'interface web d'Archipelle (jsdom uniquement ; les bibliothèques livrées sont dans src/archipelle/ui/web/vendor).",
+  "scripts": {
+    "test": "node --test \"tests/web/*.test.mjs\""
+  },
+  "devDependencies": {
+    "jsdom": "^26.0.0"
+  }
+}

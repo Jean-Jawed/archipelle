@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="fr" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'none'; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'"
+    />
+    <title>Archipelle</title>
+    <link rel="stylesheet" href="css/tokens.css" />
+    <link rel="stylesheet" href="css/layout.css" />
+    <link rel="stylesheet" href="css/chat.css" />
+    <link rel="stylesheet" href="css/forms.css" />
+  </head>
+  <body>
+    <div id="app" class="app" hidden>
+      <aside id="sidebar" class="sidebar"></aside>
+      <main class="main">
+        <header id="header" class="header"></header>
+        <div id="thread" class="thread" role="log" aria-live="polite"></div>
+        <div id="composer" class="composer"></div>
+      </main>
+    </div>
+    <div id="screen" class="screen" hidden></div>
+    <div id="dialogs" class="dialogs"></div>
+    <div id="toasts" class="toasts" role="status" aria-live="polite"></div>
+
+    <script src="vendor/markdown-it.min.js"></script>
+    <script src="vendor/purify.min.js"></script>
+    <script type="module" src="js/main.js"></script>
+  </body>
+</html>
