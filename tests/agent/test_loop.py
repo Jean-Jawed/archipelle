@@ -299,7 +299,7 @@ def test_long_results_are_replaced_by_markers_in_the_next_request(
     assert result.status == "complete"
     groups = [i for i in provider.requests[-1].items if isinstance(i, ToolResultGroup)]
     assert groups and groups[0].results[0].content.startswith("« gros/long.txt »")
-    assert "relisible avec read_file" in groups[0].results[0].content
+    assert "relis-le avec read_file" in groups[0].results[0].content
 
 
 def test_runner_is_usable_from_a_worker_thread(make_runner: Any) -> None:
@@ -324,6 +324,14 @@ def test_current_turn_keeps_full_tool_content(make_runner: Any, history: History
     runner.run()
     sent = next(i for i in provider.requests[-1].items if isinstance(i, ToolResultGroup))
     assert "échéance du bail est fixée au 30 juin" in sent.results[0].content
+    # Et le message réellement transmis à l'API contient ce texte, pas son marqueur.
+    from archipelle.providers.catalog import load_catalog
+    from archipelle.providers.mistral import MistralProvider
+
+    payload = MistralProvider(load_catalog().provider("mistral"), "cle").build_payload(
+        provider.requests[-1]
+    )
+    assert "échéance du bail est fixée au 30 juin" in str(payload["messages"])
     archived = next(
         i
         for i in history.pivot_items(runner.request.conversation_id)

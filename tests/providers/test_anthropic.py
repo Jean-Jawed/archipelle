@@ -151,8 +151,9 @@ def test_payload_translation_and_reasoning_echo(recorder: Recorder) -> None:
     assert messages[1]["content"] == first.reasoning[0].payload["content"]
     results = messages[2]["content"]
     assert [b["type"] for b in results] == ["tool_result", "tool_result", "text"]
+    # Le contenu part tel quel : le marqueur ne sert qu'à l'archive et au budget.
     assert results[0] == {"type": "tool_result", "tool_use_id": "toolu_1",
-                          "content": "retiré", "is_error": False}  # fmt: skip
+                          "content": "texte", "is_error": False}  # fmt: skip
     assert results[1]["is_error"] is True and results[1]["content"]  # jamais vide
     assert "Sous-dossier choisi" in results[2]["text"]
     assert payload["tool_choice"] == {"type": "none"}

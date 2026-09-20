@@ -301,3 +301,13 @@ def test_catalog_models_are_usable_by_the_loop() -> None:
 def test_interruption_item_shape() -> None:
     payload = interruption_item("Recherche interrompue.", ["a.pdf"])
     assert payload == {"type": "interruption", "text": "Recherche interrompue.", "files": ["a.pdf"]}
+
+
+def test_title_from_question() -> None:
+    from archipelle.agent.history import title_from_question
+
+    assert title_from_question("  Quel est le   loyer ? ") == "Quel est le loyer ?"
+    long_title = title_from_question("mot " * 40)
+    assert len(long_title) <= 61 and long_title.endswith("…")
+    assert not long_title.endswith(" …")
+    assert title_from_question("a" * 200).endswith("…")

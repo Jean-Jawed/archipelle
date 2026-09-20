@@ -527,3 +527,30 @@ def test_whole_suite_budget() -> None:
 
     assert threading.active_count() < 40
     assert time.monotonic() > 0
+
+
+def test_extension_groups_target_the_right_files(make_ctx: MakeContext, corpus: Corpus) -> None:
+    (corpus.root / "outils.py").write_text("def total(loyer):\n    return loyer * 12\n", "utf-8")
+    try:
+        ctx = make_ctx()
+        code = call(ctx, "search_fulltext", keywords=["loyer"], extensions=["code"])
+        assert "outils.py" in code.content
+        assert "notes.txt" not in code.content and "bail_2022.pdf" not in code.content
+
+        documents = call(ctx, "search_fulltext", keywords=["loyer"], extensions=["documents"])
+        assert "outils.py" not in documents.content
+        assert "contrats/bail_2022.pdf" in documents.content
+
+        listed = call(ctx, "list_files", depth=5, extensions=["code"])
+        assert "outils.py" in listed.content and "Entrées : 1." in listed.content
+        read = call(ctx, "read_file", path="outils.py")
+        assert "return loyer * 12" in read.content  # lu tel quel, sans mise en forme
+    finally:
+        (corpus.root / "outils.py").unlink()
+
+
+def test_build_directories_are_excluded_by_default() -> None:
+    from archipelle.persistence.settings_store import ScanExclusions
+
+    names = {name.casefold() for name in ScanExclusions.defaults().dir_names}
+    assert {"venv", ".venv", "node_modules", "dist", "build", "target", "__pycache__"} <= names

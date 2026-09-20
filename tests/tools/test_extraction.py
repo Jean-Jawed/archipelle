@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import pytest
 
 from archipelle.extraction import images, mail_html, office, pdf, tasks, text_files
@@ -158,3 +160,44 @@ def test_pdf_page_ocr(corpus: Corpus) -> None:
     page = pdf.ocr_page(str(corpus.root / "contrats/scan_quittance.pdf"), 1, OCR_CONFIG)
     assert page.method is ExtractionMethod.OCR
     assert "LOYER MENSUEL" in page.text
+
+
+def test_code_files_are_read_as_plain_text() -> None:
+    from archipelle.extraction.formats import EXTENSION_GROUPS, expand_extensions
+
+    assert kind_of("app.py") is FormatKind.TEXT
+    assert kind_of("Bouton.tsx") is FormatKind.TEXT
+    assert kind_of("config.YAML") is FormatKind.TEXT
+    # Une page web reste dépouillée de ses balises : c'est l'usage le plus courant.
+    assert kind_of("page.html") is FormatKind.DOCUMENT
+    # Toujours hors périmètre.
+    assert kind_of("archive.zip") is None and kind_of("binaire.exe") is None
+
+    assert expand_extensions(["code"]) == EXTENSION_GROUPS["code"]
+    assert expand_extensions(["documents"]) >= {"pdf", "docx", "txt"}
+    assert expand_extensions(["images"]) == {"png", "jpg", "jpeg", "tiff", "tif"}
+    assert expand_extensions(["code", ".PDF"]) == EXTENSION_GROUPS["code"] | {"pdf"}
+    assert expand_extensions(["groupe-inconnu"]) == {"groupe-inconnu"}
+    assert expand_extensions([]) == set() and expand_extensions(["  "]) == set()
+
+
+def test_executable_code_files_are_read_but_never_opened(tmp_path: Path) -> None:
+    """Lisible n'est pas ouvrable : un double-clic exécuterait ces fichiers (CDC §9)."""
+    from archipelle.extraction.formats import OPENABLE_EXTENSIONS
+    from archipelle.tools.open_source import open_source
+
+    for name in ("app.py", "script.bat", "outil.sh", "widget.js", "notes.md", "data.json"):
+        (tmp_path / name).write_text("contenu", encoding="utf-8")
+    opened: list[Path] = []
+
+    for refused in ("app.py", "script.bat", "outil.sh", "widget.js"):
+        assert kind_of(refused) is FormatKind.TEXT  # bien lu par les outils
+        assert not open_source(str(tmp_path), refused, verified=True, opener=opened.append).ok
+    assert opened == []
+
+    for allowed in ("notes.md", "data.json"):
+        assert open_source(str(tmp_path), allowed, verified=True, opener=opened.append).ok
+    assert len(opened) == 2
+
+    for forbidden in ("exe", "lnk", "url", "app", "command", "desktop", "msi", "scr"):
+        assert forbidden not in OPENABLE_EXTENSIONS

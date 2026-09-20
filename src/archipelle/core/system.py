@@ -6,6 +6,7 @@ import os
 import subprocess
 import sys
 from pathlib import Path
+from typing import Any
 
 IS_WINDOWS = sys.platform == "win32"
 IS_MACOS = sys.platform == "darwin"
@@ -20,8 +21,11 @@ def open_with_default_app(path: Path) -> None:
     le statut de source vérifiée et l'extension. Lève ``OSError`` en cas d'échec.
     """
     target = str(path)
-    if IS_WINDOWS:
-        os.startfile(target)  # type: ignore[attr-defined]
+    # os.startfile n'existe que sous Windows : la recherche dynamique évite une annotation
+    # qui serait nécessaire sous Linux et signalée comme inutile sous Windows.
+    start_file: Any | None = getattr(os, "startfile", None)
+    if start_file is not None:
+        start_file(target)
         return
     command = ["open", target] if IS_MACOS else ["xdg-open", target]
     subprocess.Popen(

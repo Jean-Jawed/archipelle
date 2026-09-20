@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import threading
 import time
-from typing import Any
+from typing import Any, cast
 
 import pytest
 
@@ -98,8 +98,10 @@ def test_tool_call_arguments() -> None:
 
 
 def test_result_marker_and_notices() -> None:
-    assert ToolResult("c", "n", "long", marker="court").sent_content == "court"
-    assert ToolResult("c", "n", "long").sent_content == "long"
+    # Le marqueur ne sert qu'à l'archive et au budget de contexte, jamais à l'envoi.
+    assert ToolResult("c", "n", "long", marker="court").archived_content == "court"
+    assert ToolResult("c", "n", "long").archived_content == "long"
+    assert ToolResult("c", "n", "long", marker="court").content == "long"
     assert notice_text(TreeMessage("d", "x")).startswith('<archipelle-notice kind="tree">')
     assert 'kind="scope"' in notice_text(SystemNotice("scope", "y"))
 
@@ -579,3 +581,61 @@ def test_error_type_extraction() -> None:
     assert base.error_type_of({"error": {"code": "insufficient_quota"}}) == "insufficient_quota"
     assert base.error_type_of({"type": "error"}) is None
     assert base.error_type_of("texte") is None
+
+
+@pytest.mark.parametrize("provider_id", ["mistral", "openai", "anthropic"])
+def test_providers_send_the_document_text_not_the_marker(provider_id: str) -> None:
+    """Le marqueur n'appartient qu'à l'archive et au budget de contexte : un résultat
+    d'outil doit atteindre le modèle avec son contenu (régression observée en usage réel,
+    où aucun modèle ne recevait le texte des documents)."""
+    from archipelle.core.toolspec import ToolSpec
+    from archipelle.providers.base import ChatRequest
+    from archipelle.providers.catalog import load_catalog
+    from archipelle.providers.factory import ProviderConfig, create_provider
+
+    call = ToolCall.from_arguments("c1", "read_file", {"path": "bail.pdf"})
+    items: list[PivotItem] = [
+        UserMessage("Quel loyer ?"),
+        AssistantMessage("", provider_id, "m", tool_calls=[call]),
+        ToolResultGroup(
+            [ToolResult("c1", "read_file", "LOYER: 850 EUR", marker="« bail.pdf » lu (14 c.)")]
+        ),
+    ]
+    provider: Any = create_provider(ProviderConfig(load_catalog().provider(provider_id), "cle"))
+    payload = cast(
+        dict[str, Any],
+        provider.build_payload(
+            ChatRequest("m", "prompt", items, [ToolSpec("read_file", "Lit", {})], "auto", 100)
+        ),
+    )
+    serialized = str(payload)
+    assert "LOYER: 850 EUR" in serialized
+    assert "« bail.pdf » lu" not in serialized
+
+
+@pytest.mark.parametrize("provider_id", ["mistral", "openai", "anthropic"])
+def test_providers_send_the_marker_once_the_budget_replaced_it(provider_id: str) -> None:
+    """Après remplacement par le budget, c'est bien le marqueur qui part : le contenu a
+    disparu du pivot lui-même."""
+    from archipelle.core.toolspec import ToolSpec
+    from archipelle.providers.base import ChatRequest
+    from archipelle.providers.catalog import load_catalog
+    from archipelle.providers.factory import ProviderConfig, create_provider
+
+    call = ToolCall.from_arguments("c1", "read_file", {"path": "bail.pdf"})
+    replaced = ToolResult(
+        "c1", "read_file", "« bail.pdf » lu (14 c.)", marker="« bail.pdf » lu (14 c.)"
+    )
+    items: list[PivotItem] = [
+        UserMessage("Quel loyer ?"),
+        AssistantMessage("", provider_id, "m", tool_calls=[call]),
+        ToolResultGroup([replaced]),
+    ]
+    provider: Any = create_provider(ProviderConfig(load_catalog().provider(provider_id), "cle"))
+    payload = cast(
+        dict[str, Any],
+        provider.build_payload(
+            ChatRequest("m", "prompt", items, [ToolSpec("read_file", "Lit", {})], "auto", 100)
+        ),
+    )
+    assert "« bail.pdf » lu (14 c.)" in str(payload)

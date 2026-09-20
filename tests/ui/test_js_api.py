@@ -18,7 +18,7 @@ from tests.corpus.make_corpus import Corpus
 
 class StubChooser(FolderChooser):
     def __init__(self, answers: list[str | None]) -> None:
-        super().__init__(None)
+        super().__init__()
         self.answers = answers
         self.calls: list[str | None] = []
 
@@ -184,3 +184,101 @@ def test_bridge_delivers_and_survives_a_closed_window() -> None:
     broken.start(StubWindow(fail=True))
     broken.deliver(Event("r", "c", EventType.TURN_ENDED, {}))  # ne lève pas
     broken.stop()
+
+
+def test_rename_and_auto_title(api: JsApi, corpus: Corpus) -> None:
+    created = api.new_conversation()
+    conversation_id = created["conversation"]["id"]
+    api.service.history.update_conversation(conversation_id, workdir=str(corpus.root))
+    assert created["conversation"]["title"] == ""
+
+    # Le titre est repris de la première question.
+    assert api.send(conversation_id, "Quelle est l'échéance du bail signé en 2022 ?")["ok"]
+    assert api.service.wait(60)
+    listed = api.list_conversations()["conversations"][0]
+    assert listed["title"] == "Quelle est l'échéance du bail signé en 2022 ?"
+
+    # Une question longue est coupée sur un mot entier.
+    other = api.new_conversation()["conversation"]["id"]
+    api.service.history.update_conversation(other, workdir=str(corpus.root))
+    long_question = "Peux-tu me dire " + "très " * 30 + "précisément le montant ?"
+    assert api.send(other, long_question)["ok"] and api.service.wait(60)
+    title = api.open_conversation(other)["conversation"]["title"]
+    assert len(title) <= 61 and title.endswith("…") and "  " not in title
+
+    # Renommage manuel.
+    renamed = api.rename_conversation(conversation_id, "  Bail 2022  ")
+    assert renamed["ok"] and renamed["conversation"]["title"] == "Bail 2022"
+    assert any(c["title"] == "Bail 2022" for c in renamed["conversations"])
+    assert not api.rename_conversation(conversation_id, "   ")["ok"]
+    assert not api.rename_conversation("inconnue", "x")["ok"]
+
+
+def test_delete_returns_the_updated_list(api: JsApi) -> None:
+    first = api.new_conversation()["conversation"]["id"]
+    api.new_conversation()
+    remaining = api.delete_conversation(first)["conversations"]
+    assert all(c["id"] != first for c in remaining) and len(remaining) == 1
+
+
+def test_window_is_not_reachable_from_public_attributes(api: JsApi) -> None:
+    """pywebview parcourt les attributs publics de l'objet exposé au JS : la fenêtre ne
+    doit pas s'y trouver, sous peine de parcours infini de ses objets natifs."""
+    chooser = FolderChooser()
+    sentinel = object()
+    chooser.attach(sentinel)
+    assert chooser.attached
+    public = {name: getattr(chooser, name) for name in dir(chooser) if not name.startswith("_")}
+    assert sentinel not in public.values()
+    assert "window" not in public
+
+    api.chooser = chooser
+    exposed = {name: getattr(api, name) for name in dir(api) if not name.startswith("_")}
+    assert sentinel not in exposed.values()
+
+
+def test_extra_models_are_offered_for_any_provider(api: JsApi) -> None:
+    """Un modèle saisi à la main rejoint le sélecteur du fournisseur concerné (CDC §13bis)."""
+    updated = api.update_settings({"extra_models": {"mistral": [{"id": "ministral-14b-2512"}]}})
+    assert updated["ok"]
+    mistral = next(p for p in updated["providers"] if p["id"] == "mistral")
+    identifiers = [m["id"] for m in mistral["models"]]
+    assert "ministral-14b-2512" in identifiers
+    assert "ministral-14b-latest" in identifiers  # les Ministral du catalogue sont proposés
+    added = next(m for m in mistral["models"] if m["id"] == "ministral-14b-2512")
+    assert added["in_catalog"] is False
+
+    conversation_id = api.new_conversation()["conversation"]["id"]
+    assert api.set_model(conversation_id, "ministral-14b-2512")["ok"]
+    info = api.service.model_info("mistral", "ministral-14b-2512")
+    assert info.tools and not info.in_catalog  # outils supposés pris en charge
+
+    cleared = api.update_settings({"extra_models": {}})
+    assert all(
+        m["id"] != "ministral-14b-2512"
+        for p in cleared["providers"]
+        if p["id"] == "mistral"
+        for m in p["models"]
+    )
+
+
+def test_rate_limit_message_points_to_another_model() -> None:
+    from archipelle.providers.base import RateLimited
+
+    message = RateLimited("Mistral").message()
+    assert "Mistral" in message and "un autre" in message and "Paramètres avancés" in message
+
+
+def test_finished_turns_carry_an_end_marker(api: JsApi, corpus: Corpus) -> None:
+    """Sans repère de fin, une réponse qui s'arrête net se confond avec une recherche
+    encore en cours (cas observé avec un petit modèle)."""
+    conversation_id = api.new_conversation()["conversation"]["id"]
+    api.service.history.update_conversation(conversation_id, workdir=str(corpus.root))
+    assert api.send(conversation_id, "Quelle échéance ?")["ok"] and api.service.wait(60)
+
+    items = api.open_conversation(conversation_id)["items"]
+    marked = [item for item in items if "end" in item]
+    assert len(marked) == 1  # un seul repère, à la fin du tour
+    assert marked[0] is items[-1]
+    assert marked[0]["end"]["status"] == "complete"
+    assert marked[0]["end"]["seconds"] >= 0

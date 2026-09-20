@@ -72,7 +72,54 @@ def test_startup_repairs_unfinished_turns(home: Path, corpus: Corpus) -> None:
         second.close()
 
 
+def test_window_is_attached_to_dialogs_and_bridge(home: Path) -> None:
+    """Sans ce lien, le choix du dossier de travail reste sans effet."""
+
+    class StubWindow:
+        def __init__(self) -> None:
+            self.scripts: list[str] = []
+
+        def evaluate_js(self, script: str) -> None:
+            self.scripts.append(script)
+
+    application = app.build()
+    try:
+        assert not application.api.chooser.attached
+        window = StubWindow()
+        app.attach_window(application, window)
+        assert application.api.chooser.attached
+        assert application.bridge.window is window
+    finally:
+        application.close()
+
+
 def test_home_override_is_respected(home: Path) -> None:
     dirs = resolve_dirs()
     assert str(home) in str(dirs.config)
     assert os.environ["ARCHIPELLE_HOME"] == str(home)
+
+
+def test_window_is_created_maximized(monkeypatch: pytest.MonkeyPatch) -> None:
+    """La fenêtre s'ouvre maximisée, sans masquer la barre de titre."""
+    from archipelle.ui import window as window_module
+
+    captured: dict[str, object] = {}
+
+    class StubWebview:
+        FOLDER_DIALOG = 1
+
+        @staticmethod
+        def create_window(**kwargs: object) -> str:
+            captured.update(kwargs)
+            return "fenêtre"
+
+    def fake_import(name: str) -> type[StubWebview]:
+        assert name == "webview"
+        return StubWebview
+
+    monkeypatch.setattr(window_module.importlib, "import_module", fake_import)
+    assert window_module.create_window(object()) == "fenêtre"
+    assert captured["maximized"] is True
+    assert captured.get("fullscreen") is not True  # la barre de titre reste visible
+    assert captured["min_size"] == (window_module.MIN_WIDTH, window_module.MIN_HEIGHT)
+    assert str(captured["url"]).endswith("index.html")

@@ -112,7 +112,8 @@ def test_payload_translation_with_reasoning_echo(recorder: Recorder) -> None:
         "function": {"name": "read_file", "arguments": '{"path": "bail.pdf"}'},
     }
     assert call_message["reasoning_content"] == "réflexion 1"
-    assert messages[3] == {"role": "tool", "tool_call_id": "call_1", "content": "bail.pdf retiré"}
+    # Le contenu est transmis ; « bail.pdf retiré » n'est qu'un marqueur d'archive.
+    assert messages[3] == {"role": "tool", "tool_call_id": "call_1", "content": "texte complet"}
     # Raisonnement d'un autre modèle : retiré, mais le champ reste présent (exigé par DeepSeek).
     assert messages[4]["reasoning_content"] == ""
     assert messages[4]["content"] == "Le loyer est de 850 €."
