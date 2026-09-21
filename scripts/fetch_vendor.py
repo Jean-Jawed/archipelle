@@ -80,7 +80,17 @@ def fetch(package: Package, *, update: bool = False) -> bool:
     return True
 
 
+def _utf8_output() -> None:
+    """La console Windows utilise souvent cp1252, qui ne connaît pas tous les caractères
+    des messages (« → », guillemets) : on force l'UTF-8 plutôt que d'échouer."""
+    for stream in (sys.stdout, sys.stderr):
+        reconfigure = getattr(stream, "reconfigure", None)
+        if callable(reconfigure):
+            reconfigure(encoding="utf-8", errors="replace")
+
+
 def main(argv: list[str]) -> int:
+    _utf8_output()
     update = "--update-hashes" in argv
     ok = all(fetch(package, update=update) for package in PACKAGES)
     return 0 if ok else 1

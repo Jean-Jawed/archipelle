@@ -39,7 +39,17 @@ def literal_keys() -> set[str]:
     return keys
 
 
+def _utf8_output() -> None:
+    """La console Windows utilise souvent cp1252, qui ne connaît pas tous les caractères
+    des messages (« → », guillemets) : on force l'UTF-8 plutôt que d'échouer."""
+    for stream in (sys.stdout, sys.stderr):
+        reconfigure = getattr(stream, "reconfigure", None)
+        if callable(reconfigure):
+            reconfigure(encoding="utf-8", errors="replace")
+
+
 def main() -> int:
+    _utf8_output()
     sys.path.insert(0, str(ROOT.parent))
     from archipelle.core.i18n import catalog
 
