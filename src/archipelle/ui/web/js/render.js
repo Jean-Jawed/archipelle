@@ -17,31 +17,53 @@ export function normalizePath(raw) {
     .replace(/^\/+|\/+$/g, '');
 }
 
-// Remplace [[chemin]] par une référence numérotée, avant tout rendu Markdown.
+// Repères provisoires, dans une zone Unicode privée : le rendu Markdown les laisse intacts,
+// contrairement à une balise HTML qu'il neutraliserait (protection contre le HTML des
+// documents). La balise réelle n'est insérée qu'après ce rendu.
+const OPEN = '\uE000';
+const CLOSE = '\uE001';
+const PLACEHOLDER = /\uE000(\d+)\uE001/g;
+
+// Remplace chaque [[chemin]] par un repère provisoire, et renvoie aussi la liste des
+// chemins dans l'ordre de leur numéro.
 export function replaceCitations(text, sources = []) {
-  const order = [];
-  const indexOf = (path) => {
+  const extra = [];
+  const paths = [];
+  const numberOf = (path) => {
     const known = sources.findIndex((source) => normalizePath(source.path) === path);
     if (known >= 0) return known + 1;
-    if (!order.includes(path)) order.push(path);
-    return sources.length + order.indexOf(path) + 1;
+    if (!extra.includes(path)) extra.push(path);
+    return sources.length + extra.indexOf(path) + 1;
   };
-  return String(text).replace(CITATION, (whole, raw) => {
-    const path = normalizePath(raw);
-    if (!path) return '';
-    return `<span class="citation" data-path="${escapeAttribute(path)}">[${indexOf(path)}]</span>`;
-  });
+  const withMarks = String(text)
+    .replace(new RegExp(`[${OPEN}${CLOSE}]`, 'g'), '') // aucun repère venu du texte lui-même
+    .replace(CITATION, (whole, raw) => {
+      const path = normalizePath(raw);
+      if (!path) return '';
+      const number = numberOf(path);
+      paths[number] = path;
+      return `${OPEN}${number}${CLOSE}`;
+    });
+  return { text: withMarks, paths };
 }
 
 function escapeAttribute(value) {
-  return value.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
 }
 
 export function renderAnswer(text, sources = []) {
-  const withRefs = replaceCitations(text, sources);
-  const html = markdown ? markdown.render(withRefs) : escapeAttribute(withRefs);
+  const { text: marked, paths } = replaceCitations(text, sources);
+  const html = markdown ? markdown.render(marked) : escapeAttribute(marked);
+  const withCitations = html.replace(PLACEHOLDER, (whole, number) => {
+    const path = paths[Number(number)] || '';
+    return `<span class="citation" data-path="${escapeAttribute(path)}">[${number}]</span>`;
+  });
   if (!window.DOMPurify) return '';       // sans désinfectant, on n'affiche pas de HTML
-  return window.DOMPurify.sanitize(html, {
+  return window.DOMPurify.sanitize(withCitations, {
     ALLOWED_ATTR: ['class', 'data-path', 'href', 'title', 'colspan', 'rowspan'],
     FORBID_TAGS: ['style', 'form', 'input', 'iframe', 'object', 'embed'],
     ADD_ATTR: ['data-path'],

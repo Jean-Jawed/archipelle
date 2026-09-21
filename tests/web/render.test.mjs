@@ -33,15 +33,49 @@ test('les chemins cités sont normalisés', () => {
 
 test('les marqueurs deviennent des références numérotées', () => {
   const sources = [{ path: 'notes.txt' }, { path: 'bail.pdf' }];
-  const out = render.replaceCitations('Voir [[bail.pdf]] et [[notes.txt]].', sources);
-  assert.match(out, /\[2\]/);
-  assert.match(out, /\[1\]/);
-  assert.doesNotMatch(out, /\[\[/);
+  const { text, paths } = render.replaceCitations('Voir [[bail.pdf]] et [[notes.txt]].', sources);
+  assert.doesNotMatch(text, /\[\[/);
+  assert.equal(paths[2], 'bail.pdf');
+  assert.equal(paths[1], 'notes.txt');
 });
 
 test('une citation inconnue reçoit un numéro à la suite', () => {
-  const out = render.replaceCitations('[[inconnu.pdf]]', [{ path: 'a.txt' }]);
-  assert.match(out, /\[2\]/);
+  const { paths } = render.replaceCitations('[[inconnu.pdf]]', [{ path: 'a.txt' }]);
+  assert.equal(paths[2], 'inconnu.pdf');
+});
+
+test('une citation s’affiche comme une vraie référence, jamais comme du code', () => {
+  // Régression observée en usage réel : la balise apparaissait en clair dans la réponse.
+  const html = render.renderAnswer('Né le 27 février [[CNI/CNI.pdf]].', [{ path: 'CNI/CNI.pdf' }]);
+  assert.doesNotMatch(html, /&lt;span/);
+  const holder = document.createElement('div');
+  holder.innerHTML = html;
+  const citation = holder.querySelector('span.citation');
+  assert.ok(citation, 'la référence doit être un élément réel');
+  assert.equal(citation.textContent, '[1]');
+  assert.equal(citation.getAttribute('data-path'), 'CNI/CNI.pdf');
+});
+
+test('une citation reste inoffensive même avec un chemin piégé', () => {
+  const html = render.renderAnswer('[[a"><img src=x onerror=alert(1)>.pdf]]');
+  const holder = document.createElement('div');
+  holder.innerHTML = html;
+  assert.equal(holder.querySelectorAll('img').length, 0, 'aucun élément image créé');
+  assert.equal(holder.querySelectorAll('[onerror]').length, 0, 'aucun attribut actif');
+  // Le chemin piégé reste confiné, en texte, dans l'attribut data-path.
+  assert.match(holder.querySelector('span.citation').getAttribute('data-path'), /<img/);
+});
+
+test('une citation fonctionne dans une liste et dans du gras', () => {
+  const html = render.renderAnswer('- **Montant** : 850 € [[bail.pdf]]', [{ path: 'bail.pdf' }]);
+  assert.match(html, /<li>/);
+  assert.match(html, /<strong>Montant<\/strong>/);
+  const holder = document.createElement('div');
+  holder.innerHTML = html;
+  const citation = holder.querySelector('li span.citation');
+  assert.ok(citation, 'la référence est bien dans l’élément de liste');
+  assert.equal(citation.getAttribute('data-path'), 'bail.pdf');
+  assert.equal(citation.textContent, '[1]');
 });
 
 test('le HTML contenu dans une réponse est affiché comme du texte inerte', () => {
