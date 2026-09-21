@@ -1,6 +1,6 @@
 [project]
 name = "archipelle"
-version = "0.1.0"
+version = "0.1.1"
 description = "Assistant IA local pour explorer et interroger ses propres documents, par exploration agentique."
 readme = "README.md"
 requires-python = ">=3.12"

@@ -2,6 +2,8 @@
 
 **Interrogez vos documents, sans les indexer.**
 
+![Démonstration d'Archipelle](https://raw.githubusercontent.com/Jean-Jawed/archipelle/main/assets/anim-demo.gif)
+
 Archipelle est une application de bureau qui répond à vos questions à partir de vos propres fichiers. Pas de base vectorielle, pas d'indexation préalable : un agent explore votre dossier à la demande, lit les documents utiles, et répond **en citant ses sources**, vérifiées par le programme et non par le modèle.
 
 Vos documents restent sur votre machine. Seuls les extraits nécessaires sont envoyés au fournisseur d'IA que vous choisissez.
