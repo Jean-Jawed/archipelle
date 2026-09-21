@@ -11,12 +11,17 @@ concurrency:
 
 jobs:
   checks:
-    name: ${{ matrix.os }}
+    name: ${{ matrix.os }} · Python ${{ matrix.python }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
+        # Les deux extrémités de la plage acceptée par le paquet (requires-python) :
+        # la version minimale, et la plus récente publiée.
+        python: ['3.12', '3.14']
+    env:
+      UV_PYTHON: ${{ matrix.python }}  # prime sur .python-version, réservé au développement
     steps:
       - uses: actions/checkout@v6
 
