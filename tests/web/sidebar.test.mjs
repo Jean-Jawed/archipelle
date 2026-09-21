@@ -1,20 +1,24 @@
 // Barre latérale : le renommage doit survivre au redessin provoqué par le clic.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import path from 'node:path';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const web = path.join(here, '..', '..', 'src', 'archipelle', 'ui', 'web');
+
+// Sous Windows, un chemin absolu (« D:\… ») n'est pas une adresse de module valide :
+// Node exige une URL « file:// ». Cette aide rend les imports portables.
+const moduleUrl = (...parts) => pathToFileURL(path.join(web, ...parts)).href;
 
 const { JSDOM } = await import('jsdom');
 const dom = new JSDOM('<!doctype html><body><div id="sidebar"></div><div id="dialogs"></div></body>');
 globalThis.window = dom.window;
 globalThis.document = dom.window.document;
 
-const i18n = await import(path.join(web, 'js', 'i18n.js'));
-const store = await import(path.join(web, 'js', 'store.js'));
-const { renderSidebar } = await import(path.join(web, 'js', 'views', 'sidebar.js'));
+const i18n = await import(moduleUrl('js', 'i18n.js'));
+const store = await import(moduleUrl('js', 'store.js'));
+const { renderSidebar } = await import(moduleUrl('js', 'views', 'sidebar.js'));
 
 i18n.install({ 'ui.sidebar.new': 'Nouvelle', 'ui.sidebar.search': 'Rechercher' });
 

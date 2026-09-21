@@ -2,11 +2,15 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import path from 'node:path';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const web = path.join(here, '..', '..', 'src', 'archipelle', 'ui', 'web');
+
+// Sous Windows, un chemin absolu (« D:\… ») n'est pas une adresse de module valide :
+// Node exige une URL « file:// ». Cette aide rend les imports portables.
+const moduleUrl = (...parts) => pathToFileURL(path.join(web, ...parts)).href;
 
 // La fenêtre est simulée par jsdom, puis les bibliothèques RÉELLEMENT LIVRÉES
 // (ui/web/vendor) y sont exécutées : les tests portent sur ce qui sera embarqué.
@@ -17,9 +21,9 @@ dom.window.eval(readFileSync(path.join(web, 'vendor', 'purify.min.js'), 'utf8'))
 globalThis.window = dom.window;
 globalThis.document = dom.window.document;
 
-const render = await import(path.join(web, 'js', 'render.js'));
-const i18n = await import(path.join(web, 'js', 'i18n.js'));
-const store = await import(path.join(web, 'js', 'store.js'));
+const render = await import(moduleUrl('js', 'render.js'));
+const i18n = await import(moduleUrl('js', 'i18n.js'));
+const store = await import(moduleUrl('js', 'store.js'));
 
 test('les chemins cités sont normalisés', () => {
   assert.equal(render.normalizePath('./dossier//fichier.pdf'), 'dossier/fichier.pdf');
